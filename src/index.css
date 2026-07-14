@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* Keep all motion <= 250ms; ?reduceMotion=1 zeroes it out entirely. */
+* {
+  transition-duration: 150ms;
+}
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  transition-duration: 0ms !important;
+  animation-duration: 0ms !important;
+}
+
+html {
+  @apply text-slate-800 antialiased;
+}
+
+body {
+  @apply bg-slate-50;
+}
