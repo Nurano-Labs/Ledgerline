@@ -318,6 +318,7 @@ function AdjustmentsStep({ payable }: { payable: Employee[] }) {
   const state = useStore((s) => s.payrollWizard)
   const dispatch = useStore((s) => s.payrollDispatch)
   const [openFor, setOpenFor] = useState<string | null>(null)
+  const [placement, setPlacement] = useState<'above' | 'below'>('below')
   const [form, setForm] = useState<{ type: AdjustmentType; amount: string; memo: string }>({ type: 'bonus', amount: '', memo: '' })
   const [formError, setFormError] = useState('')
 
@@ -326,7 +327,9 @@ function AdjustmentsStep({ payable }: { payable: Employee[] }) {
     return s + sumAdjustments(adjs, 'bonus') + sumAdjustments(adjs, 'reimbursement') - sumAdjustments(adjs, 'deduction')
   }, 0)
 
-  function openPopover(empId: string) {
+  function openPopover(empId: string, row: HTMLElement) {
+    const rect = row.getBoundingClientRect()
+    setPlacement(rect.top + rect.height / 2 > window.innerHeight / 2 ? 'above' : 'below')
     setOpenFor(empId)
     setForm({ type: 'bonus', amount: '', memo: '' })
     setFormError('')
@@ -401,14 +404,21 @@ function AdjustmentsStep({ payable }: { payable: Employee[] }) {
                     </span>
                   ))}
                 </div>
-                <button className={btnGhost} onClick={() => (isOpen ? setOpenFor(null) : openPopover(emp.id))} data-testid={`add-adjustment-${emp.id}`}>
+                <button
+                  className={btnGhost}
+                  onClick={(e) => (isOpen ? setOpenFor(null) : openPopover(emp.id, e.currentTarget.closest('li')!))}
+                  data-testid={`add-adjustment-${emp.id}`}
+                >
                   <Icon name="plus" className="h-4 w-4" />
                   Add adjustment
                 </button>
               </div>
               {isOpen && (
                 <div
-                  className="absolute right-5 top-full z-30 -mt-1 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-xl"
+                  className={`absolute right-5 z-30 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-xl ${
+                    placement === 'above' ? 'bottom-full -mb-1' : 'top-full -mt-1'
+                  }`}
+                  data-placement={placement}
                   data-testid="adjustment-popover"
                 >
                   <h3 className="text-sm font-semibold text-slate-900">Add adjustment for {emp.name}</h3>
