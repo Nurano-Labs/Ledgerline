@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store'
+import { useAuth } from '../auth'
 import { GlobalSearch } from './GlobalSearch'
 import { NotificationBell } from './NotificationBell'
 import { Icon, type IconName } from './Icon'
+import { btnGhost } from './ui'
 
 const NAV_SECTIONS: { label: string; items: { to: string; label: string; icon: IconName; testid: string }[] }[] = [
   {
@@ -37,6 +39,7 @@ export function Layout() {
   const location = useLocation()
   const resetAll = useStore((s) => s.resetAll)
   const toasts = useStore((s) => s.toasts)
+  const logout = useAuth((s) => s.logout)
 
   // Harness hooks: ?reset=1 restores the seed; ?reduceMotion=1 kills animation;
   // ?wizard=payroll&step=3 style deep links jump into wizard mid-states.
@@ -111,6 +114,19 @@ export function Layout() {
             </span>
             Demo Admin
           </span>
+          <button
+            type="button"
+            data-testid="sign-out"
+            className={btnGhost}
+            onClick={() => {
+              // Clearing auth lets RequireAuth bounce the current protected route to
+              // /login on its own; navigate there explicitly for a deterministic target.
+              logout()
+              navigate('/login', { replace: true })
+            }}
+          >
+            Sign out
+          </button>
         </header>
         <main className="flex-1 overflow-y-auto px-6 py-6">
           <Outlet />
