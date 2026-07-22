@@ -92,11 +92,6 @@ export function Login() {
             </button>
           </form>
         </div>
-
-        <p className="mt-4 text-center text-xs text-slate-400" data-testid="login-demo-hint">
-          Demo credentials — <span className="font-medium text-slate-500">testuser</span> /{' '}
-          <span className="font-medium text-slate-500">testpass</span>
-        </p>
       </div>
     </div>
   )
