@@ -40,5 +40,5 @@ narration source of truth. Destructive actions use typed-confirmation dialogs
 1. Run your first payroll (dashboard alert → 4-step wizard, edit OT hours + add a bonus, typed APPROVE)
 2. Onboard a W-2 employee (7 steps, split direct deposit, medical plan)
 3. Onboard a contractor (5-step branch of the same wizard)
-4. Approve one PTO request and deny the overlapping one with a reason
+4. Approve one PTO request and deny the overlapping one with a reason category + reason
 5. Build and export a payroll summary report (CSV matches the on-screen table)
