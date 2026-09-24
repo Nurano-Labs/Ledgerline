@@ -1,4 +1,4 @@
-import type { EmployeeStatus, EmploymentType, PtoType } from '../types'
+import type { EmployeeStatus, DenyCategory, EmploymentType, PtoType } from '../types'
 import { initials } from '../data/format'
 
 const STATUS_STYLES: Record<EmployeeStatus, string> = {
@@ -34,6 +34,13 @@ export const PTO_TYPE_LABELS: Record<PtoType, string> = {
   vacation: 'Vacation',
   sick: 'Sick',
   personal: 'Personal',
+}
+
+export const DENY_CATEGORY_LABELS: Record<DenyCategory, string> = {
+  coverage: 'Coverage conflict',
+  blackout: 'Blackout period',
+  balance: 'Insufficient balance',
+  other: 'Other',
 }
 
 export function PtoTypeBadge({ type }: { type: PtoType }) {
