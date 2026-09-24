@@ -5,7 +5,7 @@ import { DEPARTMENTS, FILING_STATUS_LABELS } from '../types'
 import { employeeById, useStore } from '../store'
 import { fmtDate, fmtRange, fmtUSD } from '../data/format'
 import { PERIODS_PER_YEAR } from '../data/payroll'
-import { Avatar, DENY_CATEGORY_LABELS, PTO_TYPE_LABELS, StatusBadge, TypeBadge } from '../components/badges'
+import { Avatar, PTO_TYPE_LABELS, StatusBadge, TypeBadge } from '../components/badges'
 import { ConfirmDialog } from '../components/dialogs'
 import { InfoTip } from '../components/InfoTip'
 import { Icon } from '../components/Icon'
@@ -634,7 +634,6 @@ function TimeOffTab({ emp }: { emp: Employee }) {
                   >
                     {r.status}
                   </span>
-                  {r.denyCategory && <span className="text-slate-500"> — {DENY_CATEGORY_LABELS[r.denyCategory]}</span>}
                   {r.denyReason && <span className="text-slate-500"> — “{r.denyReason}”</span>}
                 </li>
               ))}
