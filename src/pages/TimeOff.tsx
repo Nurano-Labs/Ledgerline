@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { PTORequest } from '../types'
+import type { DenyCategory, PTORequest } from '../types'
 import { employeeById, pendingPto, useStore } from '../store'
 import { fmtRange } from '../data/format'
-import { Avatar, PTO_TYPE_LABELS, PtoTypeBadge } from '../components/badges'
+import { Avatar, DENY_CATEGORY_LABELS, PTO_TYPE_LABELS, PtoTypeBadge } from '../components/badges'
 import { Icon } from '../components/Icon'
-import { btnDanger, btnPrimary, btnSecondary, cardCls, errorTextCls, inputCls, inputErrorCls } from '../components/ui'
+import { btnDanger, btnPrimary, btnSecondary, cardCls, errorTextCls, inputCls, inputErrorCls, selectCls } from '../components/ui'
 
 /** Two pending requests overlap when they share a department and their date ranges intersect. */
 function overlapsWith(request: PTORequest, all: PTORequest[], sameDept: (a: string, b: string) => boolean): PTORequest | undefined {
@@ -25,7 +25,9 @@ export function TimeOff() {
   const decidePto = useStore((s) => s.decidePto)
   const toast = useStore((s) => s.toast)
   const [denyingId, setDenyingId] = useState<string | null>(null)
+  const [denyCategory, setDenyCategory] = useState<DenyCategory | ''>('')
   const [denyReason, setDenyReason] = useState('')
+  const [denyCategoryError, setDenyCategoryError] = useState('')
   const [denyError, setDenyError] = useState('')
 
   const pending = pendingPto(requests)
@@ -40,17 +42,24 @@ export function TimeOff() {
     toast(`Approved ${emp?.name}’s ${PTO_TYPE_LABELS[request.type].toLowerCase()} request (−${request.hours}h).`)
   }
 
-  function submitDeny(request: PTORequest) {
-    if (!denyReason.trim()) {
-      setDenyError('A reason is required to deny a request.')
-      return
-    }
-    const emp = employeeById(employees, request.employeeId)
-    decidePto(request.id, 'denied', denyReason.trim())
-    toast(`Denied ${emp?.name}’s request.`)
-    setDenyingId(null)
+  function resetDenyForm(id: string | null) {
+    setDenyingId(id)
+    setDenyCategory('')
     setDenyReason('')
+    setDenyCategoryError('')
     setDenyError('')
+  }
+
+  function submitDeny(request: PTORequest) {
+    const categoryMissing = !denyCategory
+    const reasonMissing = !denyReason.trim()
+    setDenyCategoryError(categoryMissing ? 'Choose a reason category.' : '')
+    setDenyError(reasonMissing ? 'A reason is required to deny a request.' : '')
+    if (categoryMissing || reasonMissing) return
+    const emp = employeeById(employees, request.employeeId)
+    decidePto(request.id, 'denied', { category: denyCategory, reason: denyReason.trim() })
+    toast(`Denied ${emp?.name}’s request (${DENY_CATEGORY_LABELS[denyCategory].toLowerCase()}).`)
+    resetDenyForm(null)
   }
 
   return (
@@ -107,11 +116,7 @@ export function TimeOff() {
                   </button>
                   <button
                     className={btnSecondary}
-                    onClick={() => {
-                      setDenyingId(denying ? null : request.id)
-                      setDenyReason('')
-                      setDenyError('')
-                    }}
+                    onClick={() => resetDenyForm(denying ? null : request.id)}
                     data-testid={`pto-deny-${request.id}`}
                   >
                     Deny
@@ -121,9 +126,31 @@ export function TimeOff() {
               {denying && (
                 <div className="mt-4 border-t border-slate-100 pt-4">
                   <label className="block text-sm font-medium text-slate-700">
+                    Reason category
+                    <select
+                      autoFocus
+                      value={denyCategory}
+                      onChange={(e) => {
+                        setDenyCategory(e.target.value as DenyCategory | '')
+                        setDenyCategoryError('')
+                      }}
+                      className={`${selectCls} mt-1.5 ${denyCategoryError ? inputErrorCls : ''}`}
+                      data-testid={`pto-deny-category-${request.id}`}
+                    >
+                      <option value="" disabled>
+                        Select a category…
+                      </option>
+                      {(Object.keys(DENY_CATEGORY_LABELS) as DenyCategory[]).map((c) => (
+                        <option key={c} value={c}>
+                          {DENY_CATEGORY_LABELS[c]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {denyCategoryError && <p className={errorTextCls}>{denyCategoryError}</p>}
+                  <label className="mt-3 block text-sm font-medium text-slate-700">
                     Reason for denial (shared with {emp.name.split(' ')[0]})
                     <textarea
-                      autoFocus
                       rows={2}
                       value={denyReason}
                       onChange={(e) => {
@@ -136,7 +163,7 @@ export function TimeOff() {
                   </label>
                   {denyError && <p className={errorTextCls}>{denyError}</p>}
                   <div className="mt-3 flex justify-end gap-2">
-                    <button className={btnSecondary} onClick={() => setDenyingId(null)}>
+                    <button className={btnSecondary} onClick={() => resetDenyForm(null)}>
                       Cancel
                     </button>
                     <button className={btnDanger} onClick={() => submitDeny(request)} data-testid={`pto-deny-submit-${request.id}`}>
@@ -169,6 +196,11 @@ export function TimeOff() {
                   <span className={`ml-auto font-medium ${r.status === 'approved' ? 'text-emerald-700' : 'text-rose-600'}`}>
                     {r.status}
                   </span>
+                  {r.denyCategory && (
+                    <span className="rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700" data-testid={`pto-deny-category-label-${r.id}`}>
+                      {DENY_CATEGORY_LABELS[r.denyCategory]}
+                    </span>
+                  )}
                   {r.denyReason && <span className="text-xs text-slate-500">“{r.denyReason}”</span>}
                 </li>
               )

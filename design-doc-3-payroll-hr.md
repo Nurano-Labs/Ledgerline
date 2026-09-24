@@ -68,7 +68,7 @@ Four steps over a persistent pay-period header ("Jun 16 – Jun 30, 2026 · Pay 
 Steps are strictly dependent: edits in step 1–2 must visibly change step 3's numbers, which is both the hardest state test and the best narration moment ("notice the net pay update after the bonus").
 
 ### 5.5 Time-Off Queue (`/time-off`)
-Pending request cards (employee, dates, type, remaining balance, overlap warning if two teammates in the same department overlap). Approve/Deny; deny requires a reason textarea. Decisions update the employee profile balance and decrement the notification badge.
+Pending request cards (employee, dates, type, remaining balance, overlap warning if two teammates in the same department overlap). Approve/Deny; deny requires a reason category (Coverage conflict / Blackout period / Insufficient balance / Other) and a reason textarea. Decisions update the employee profile balance and decrement the notification badge.
 
 ### 5.6 Reports (`/reports`)
 Three-panel builder: report type list (Payroll summary, PTO liability, Headcount), parameter form (date-range picker, department multi-select, group-by radio), and a Generate button producing an in-page table plus a real CSV download assembled client-side — giving tutorials a genuine "export" ending beat.
@@ -87,7 +87,7 @@ PayRun     { id, periodStart, periodEnd, payDate, status:'processed',
 PayLine    { employeeId, hours?, adjustments[], gross, fedWH, stateWH,
              socialSecurity, medicare, benefitDeductions, net }
 PTORequest { id, employeeId, startDate, endDate, hours, type, status,
-             denyReason? }
+             denyCategory?, denyReason? }
 MedicalPlan{ id, name, perPaycheckCost, tier }
 ```
 
@@ -104,7 +104,7 @@ Single store: entity collections above, per-wizard state machines (current step,
 1. **Run your first payroll** — dashboard alert → wizard steps 1–4, including editing one employee's OT hours and adding a bonus so the preview visibly changes. (~20 steps; the flagship recording.)
 2. **Onboard a new W-2 employee** — full 7-step wizard including a split direct deposit and a medical plan choice. Tests conditional branching and dependent validation.
 3. **Onboard a contractor** — same wizard, opposite branch; a paired recording that demonstrates the conditional flow.
-4. **Approve and deny time off** — approve one request, deny the overlapping one with a reason; show the balance change on the profile.
+4. **Approve and deny time off** — approve one request, deny the overlapping one with a reason category and reason; show the balance change on the profile.
 5. **Build and export a payroll summary report** — parameterize, generate, download CSV.
 
 ## 9. Agent-Friendliness Requirements
