@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import type { Department, DenyCategory, Employee, MedicalPlan, PTORequest, PayRun } from './types'
+import type { Department, Employee, MedicalPlan, PTORequest, PayRun } from './types'
 import { MEDICAL_PLANS, seedEmployees, seedPayRuns, seedPtoRequests } from './data/seed'
 import { CURRENT_PERIOD } from './data/period'
 import {
@@ -44,7 +44,7 @@ interface AppState {
   addEmployee: (employee: Employee) => string
   terminateEmployees: (ids: string[]) => void
   changeDepartment: (ids: string[], department: Department) => void
-  decidePto: (id: string, decision: 'approved' | 'denied', denial?: { category: DenyCategory; reason: string }) => void
+  decidePto: (id: string, decision: 'approved' | 'denied', reason?: string) => void
 
   onboardingDispatch: (action: OnboardingAction) => void
   payrollDispatch: (action: PayrollAction) => void
@@ -102,20 +102,13 @@ export const useStore = create<AppState>()(
       employees: s.employees.map((e) => (ids.includes(e.id) ? { ...e, department } : e)),
     })),
 
-  decidePto: (id, decision, denial) =>
+  decidePto: (id, decision, reason) =>
     set((s) => {
       const request = s.ptoRequests.find((r) => r.id === id)
       if (!request || request.status !== 'pending') return s
       return {
         ptoRequests: s.ptoRequests.map((r) =>
-          r.id === id
-            ? {
-                ...r,
-                status: decision,
-                denyCategory: decision === 'denied' ? denial?.category : undefined,
-                denyReason: decision === 'denied' ? denial?.reason : undefined,
-              }
-            : r,
+          r.id === id ? { ...r, status: decision, denyReason: decision === 'denied' ? reason : undefined } : r,
         ),
         employees:
           decision === 'approved'
