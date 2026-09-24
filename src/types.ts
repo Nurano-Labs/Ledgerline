@@ -100,6 +100,8 @@ export interface PayRun {
 
 export type PtoType = 'vacation' | 'sick' | 'personal'
 
+export type DenyCategory = 'coverage' | 'blackout' | 'balance' | 'other'
+
 export interface PTORequest {
   id: string
   employeeId: string
@@ -108,6 +110,7 @@ export interface PTORequest {
   hours: number
   type: PtoType
   status: 'pending' | 'approved' | 'denied'
+  denyCategory?: DenyCategory
   denyReason?: string
 }
 
